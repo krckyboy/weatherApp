@@ -1,11 +1,9 @@
 import React, { Component, createRef } from "react";
-import { getCurrentWeather, getFiveDayForecast } from "../utils/api";
-import { Redirect } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 
 class Form extends Component {
   state = {
-    location: "",
-    redirect: false
+    location: ""
   };
 
   textInput = createRef();
@@ -19,54 +17,22 @@ class Form extends Component {
     e.preventDefault();
     const { location } = { ...this.state };
     if (location.trim()) {
-      //   const [currentWeather, fiveDayForecast] = await this.getData();
-      //   console.log("Current: ", currentWeather);
-      //   console.log("Five day forecast: ", fiveDayForecast);
-      this.setRedirect();
+      this.forwardParams();
     } else {
-      this.clearInput();
+      this.resetInput();
     }
   };
 
-  setRedirect = () => {
-    this.setState({ redirect: true });
+  forwardParams = () => {
+    this.props.history.push({
+      pathname: "/forecast",
+      search: `?location=${this.state.location}`
+    });
   };
 
-  renderRedirect = () => {
-    if (this.state.redirect) {
-      return (
-        <Redirect
-          to={{
-            pathname: "/forecast",
-            search: `?location=${this.state.location}`
-          }}
-        />
-      );
-    }
-  };
-
-  clearInput = () => {
+  resetInput = () => {
     this.setState({ location: "" });
     this.textInput.current.focus();
-  };
-
-  getData = async () => {
-    return Promise.all([
-      this.getDataForCurrentTime(),
-      this.getDataForFiveDays()
-    ]).then(data => data);
-  };
-
-  getDataForFiveDays = async () => {
-    const { location } = this.state;
-    const data = await getFiveDayForecast(location);
-    return data;
-  };
-
-  getDataForCurrentTime = async () => {
-    const { location } = this.state;
-    const data = await getCurrentWeather(location);
-    return data;
   };
 
   render() {
@@ -84,6 +50,7 @@ class Form extends Component {
           placeholder="St. George, Utah"
           value={location}
           onChange={this.onChange}
+          required
         />
         <button>Get Weather</button>
       </form>
@@ -91,4 +58,4 @@ class Form extends Component {
   }
 }
 
-export default Form;
+export default withRouter(Form);

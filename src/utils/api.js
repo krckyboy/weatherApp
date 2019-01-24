@@ -38,3 +38,39 @@ const handleError = err => {
     `Warning! There's an error with getCurrentWeather() ${err}`
   );
 };
+
+export const formatDate = unformatted => {
+  const allMonths = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ];
+
+  const formatted = unformatted.split(/(\s+)/);
+  const d = new Date(formatted[0]);
+
+  const year = d.getFullYear();
+  const month = allMonths[d.getMonth()];
+  const dayDate = days[d.getDay()];
+  const numberDay = d.getUTCDate() + 1;
+  return { numberDay, month, dayDate };
+};
