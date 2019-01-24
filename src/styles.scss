@@ -1,0 +1,36 @@
+@import "scss/reset";  
+
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+html,
+body,
+#root, .App {
+  height: 100%;
+}
+
+body, #root, .App {
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  min-height: 60px;
+}
+
+main {
+  flex-grow: 1;
+  overflow: auto;
+}
+
+footer {
+  min-height: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
