@@ -24,7 +24,6 @@ class Forecast extends Component {
 
   getAndUpdate = (theProps = this.props.location.search) => {
     const { location } = queryString.parse(theProps);
-    console.log("Location: ", location);
     this.setState({ location }, async () => {
       const [currentWeather, fiveDayForecast] = await this.getData();
       this.updateStates(currentWeather, fiveDayForecast);
@@ -135,10 +134,6 @@ class Days extends Component {
 }
 
 class Day extends Component {
-  sendProps = () => {
-    console.log(this.props.match.url);
-  };
-
   render() {
     const { data: day, click } = this.props;
     const dateStamp = formatDate(day.dt_txt);

@@ -9,6 +9,7 @@ function Detail(props) {
   const { city } = props.match.params;
 
   const day = props.location.data;
+  console.log("Sent data:", day);
   return <div>DETAIL!</div>;
 }
 
