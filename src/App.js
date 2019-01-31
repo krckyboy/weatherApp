@@ -3,7 +3,8 @@ import Header from "./components/Header";
 import Landing from "./components/Landing";
 import Missing from "./components/Missing";
 import Forecast from "./components/Forecast";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
+import Detail from "./components/Detail";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
         <Header />
         <Switch>
           <Route exact path="/" component={Landing} />
-          <Route exact path="/forecast" component={Forecast} />
+          <Route path="/forecast" component={Forecast} />
+          <Route exact path="/details/:city" component={Detail} />
           <Route component={Missing} />
         </Switch>
       </div>

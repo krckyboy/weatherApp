@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import queryString from "query-string";
 import Missing from "./Missing";
 import Loading from "./Loading";
-import { Link } from "react-router-dom";
+import { withRouter } from "react-router-dom";
 import {
   getCurrentWeather,
   getFiveDayForecast,
@@ -19,14 +19,33 @@ class Forecast extends Component {
   };
 
   async componentDidMount() {
-    const [currentWeather, fiveDayForecast] = await this.getData();
-    console.log("current", currentWeather);
-    console.log("fivedayforecast", fiveDayForecast);
+    this.getAndUpdate();
+  }
+
+  getAndUpdate = (theProps = this.props.location.search) => {
+    const { location } = queryString.parse(theProps);
+    console.log("Location: ", location);
+    this.setState({ location }, async () => {
+      const [currentWeather, fiveDayForecast] = await this.getData();
+      this.updateStates(currentWeather, fiveDayForecast);
+    });
+  };
+
+  updateStates = (currentWeather, fiveDayForecast) => {
     if (fiveDayForecast === null) {
       return this.setState({ error: true });
     } else {
-      this.setState({ currentWeather, fiveDayForecast, loading: false });
+      this.setState({
+        currentWeather,
+        fiveDayForecast,
+        loading: false,
+        error: false
+      });
     }
+  };
+
+  componentWillReceiveProps(newProps) {
+    this.getAndUpdate(newProps.location.search);
   }
 
   getData = async () => {
@@ -37,21 +56,35 @@ class Forecast extends Component {
   };
 
   getDataForFiveDays = async () => {
-    const { location } = queryString.parse(this.props.location.search);
+    const { location } = this.state;
     const data = await getFiveDayForecast(location);
     return data;
   };
 
   getDataForCurrentTime = async () => {
-    const { location } = queryString.parse(this.props.location.search);
+    const { location } = this.state;
     const data = await getCurrentWeather(location);
     return data;
   };
 
+  /* Render a new page and send object with data for the clicked day */
+  showDetailPage = data => {
+    this.props.history.push({
+      pathname: "/details/" + this.state.location,
+      data
+    });
+  };
+
   render() {
     // Do all the rendering here
-    const { location } = queryString.parse(this.props.location.search);
-    const { loading, error, fiveDayForecast, currentWeather } = this.state;
+    const {
+      loading,
+      error,
+      fiveDayForecast,
+      currentWeather,
+      location
+    } = this.state;
+    const { match } = this.props;
 
     // If there are no params, render 404 page
     if (!location) {
@@ -71,7 +104,11 @@ class Forecast extends Component {
     return (
       <div>
         <h2>{this.state.currentWeather.name}</h2>
-        <Days data={fiveDayForecast} />
+        <Days
+          data={fiveDayForecast}
+          match={match}
+          detail={this.showDetailPage}
+        />
       </div>
     );
   }
@@ -79,12 +116,18 @@ class Forecast extends Component {
 
 class Days extends Component {
   render() {
-    const { data } = this.props;
+    const { data, match, detail } = this.props;
     const { list: days } = data;
     return (
       <ul>
         {days.map(day => (
-          <Day key={day.dt} data={day} city={data.city.name} />
+          <Day
+            key={day.dt}
+            data={day}
+            city={data.city.name}
+            match={match}
+            click={detail}
+          />
         ))}
       </ul>
     );
@@ -92,40 +135,27 @@ class Days extends Component {
 }
 
 class Day extends Component {
-  onClick = () => {
-    this.sendProps();
-    console.log(this.props.city);
-  };
-
   sendProps = () => {
-    // console.log(this.props.data);
+    console.log(this.props.match.url);
   };
 
   render() {
-    const { data: day } = this.props;
+    const { data: day, click } = this.props;
     const dateStamp = formatDate(day.dt_txt);
     const { numberDay, month, dayDate } = dateStamp;
-
-    // Or maybe Wrap in a Link element
-    // Or redirect, who knows
-    // New component, render and pass props
+    const { temp_min: min, temp_max: max } = day.main;
 
     return (
-      <Link
-        to={{
-          pathname: ``,
-          search: ``
-        }}
-      >
-        <li className="day" onClick={this.onClick}>
-          <img alt="Weather" />
-          <p>
-            {dayDate}, {month} {numberDay}
-          </p>
-        </li>
-      </Link>
+      <li className="day" onClick={() => click(day)}>
+        <img alt="Weather" />
+        <p>
+          {dayDate}, {month} {numberDay}
+        </p>
+        <p>min: {min}</p>
+        <p>max: {max}</p>
+      </li>
     );
   }
 }
 
-export default Forecast;
+export default withRouter(Forecast);
